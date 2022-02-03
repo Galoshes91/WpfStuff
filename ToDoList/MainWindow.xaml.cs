@@ -55,6 +55,9 @@ namespace ToDoList
                 Debug.WriteLine("empty strings");
             }
 
+            ToDoTitle.Text = string.Empty;
+            ToDoDetails.Text = string.Empty;
+
             GetRecords();
         }
 
