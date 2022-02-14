@@ -42,9 +42,9 @@ namespace ToDoList
         private void toDoEntries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var buff = sender as ListBox;
-            if (buff != null)
+            if (buff != null && buff.SelectedItem != null)
             {
-                Debug.WriteLine(buff.SelectedItem);
+                toDoList.SelectRecord(buff.SelectedItem.ToString());
             }
         }
 
@@ -52,12 +52,19 @@ namespace ToDoList
         {
             toDoList.GetRecords(toDoEntries);
         }
+
+        private void removeButton_Click(object sender, RoutedEventArgs e)
+        {
+            toDoList.RemoveRecord();
+            UpdateList();
+        }
     }
 
     public class ToDoListClass : baseViewModel
     {
         private readonly string databaseName = "database.db";
         private List<ToDoRecord> Records;
+        private string selectedValue;
 
         public ToDoListClass()
         {
@@ -93,21 +100,22 @@ namespace ToDoList
         public void GetRecords(ListBox toDoEntries)
         {
             Records = new List<ToDoRecord>();
-            var connection = CommonFunctions.DatabaseOpenConnection(databaseName);
-
-            var command = CommonFunctions.DatabaseCreateCommand(connection, "SELECT * FROM test");
-            var reader = command.ExecuteReader();
-
-            while (reader.Read())
+            using (var connection = CommonFunctions.DatabaseOpenConnection(databaseName))
             {
-                //Debug.WriteLine(reader.GetString(1));
-                var key = int.Parse(reader.GetString(0));
-                var title = reader.GetString(1);
-                var desc = reader.GetString(2);
-                Records.Add(new ToDoRecord(key, title, desc));
-            }
 
-            connection.Close();
+                var command = CommonFunctions.DatabaseCreateCommand(connection, "SELECT * FROM test");
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var key = int.Parse(reader.GetString(0));
+                    var title = reader.GetString(1);
+                    var desc = reader.GetString(2);
+                    Records.Add(new ToDoRecord(key, title, desc));
+                }
+
+                connection.Close();
+            }
 
             // Update list
             toDoEntries.Items.Clear();
@@ -116,6 +124,26 @@ namespace ToDoList
             {
                 toDoEntries.Items.Add(record.ToString());
                 Debug.WriteLine(record.ToString());
+            }
+        }
+
+        public void SelectRecord(string? item)
+        {
+            // get database ID
+            var x = item.Split(new[] { ' ', '\n' });
+            selectedValue = x[1];
+        }
+
+        public void RemoveRecord()
+        {
+            if(selectedValue != null)
+            {
+                using (var connection = CommonFunctions.DatabaseOpenConnection(databaseName))
+                {
+                    var command = CommonFunctions.DatabaseCreateCommand(connection, string.Format("DELETE FROM test WHERE ID={0}", selectedValue));
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                }
             }
         }
     }

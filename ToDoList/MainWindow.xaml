@@ -10,7 +10,7 @@
         ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
 
         </Grid.RowDefinitions>
@@ -28,8 +28,9 @@
 
         <StackPanel Grid.Row="1" Margin="0,0,0,20">
             <Button x:Name="saveButton" Click="saveButton_Click" Height="40" Width="120" Content="Save" FontWeight="Bold" FontSize="22" HorizontalAlignment="Left"/>
+            <Button x:Name="removeButton" Click="removeButton_Click" Height="40" Width="120" Content="Remove" FontWeight="Bold" FontSize="22" HorizontalAlignment="Right"/>
         </StackPanel>
 
-        <ListBox Grid.Column="1" x:Name="toDoEntries" SelectionChanged="toDoEntries_SelectionChanged"/>
+        <ListBox Grid.Column="1" Grid.Row="0" x:Name="toDoEntries" SelectionChanged="toDoEntries_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Visible" />
     </Grid>
 </Window>
