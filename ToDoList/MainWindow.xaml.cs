@@ -19,7 +19,7 @@ using System.Diagnostics; // temp
 namespace ToDoList
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Purpose of this application is to play around with database related WPF stuff (specifically using the SQLite library)
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -44,6 +44,7 @@ namespace ToDoList
             var buff = sender as ListBox;
             if (buff != null && buff.SelectedItem != null)
             {
+                removeButton.IsEnabled = true;
                 toDoList.SelectRecord(buff.SelectedItem.ToString());
             }
         }
@@ -56,6 +57,8 @@ namespace ToDoList
         private void removeButton_Click(object sender, RoutedEventArgs e)
         {
             toDoList.RemoveRecord();
+            removeButton.IsEnabled = false;
+
             UpdateList();
         }
     }
@@ -123,7 +126,6 @@ namespace ToDoList
             foreach (var record in Records)
             {
                 toDoEntries.Items.Add(record.ToString());
-                Debug.WriteLine(record.ToString());
             }
         }
 
