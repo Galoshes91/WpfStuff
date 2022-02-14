@@ -14,12 +14,7 @@ namespace BaseLibrary
         // This can probably be turned into a class itself 
         // TODO: error handling
 
-        /// <summary>
-        /// Opens a database connection 
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns>A sqlite connection</returns>
-        public static SqliteConnection databaseOpenConnection(string fileName)
+        public static SqliteConnection DatabaseOpenConnection(string fileName)
         {
             var dbConnection = new SqliteConnection(string.Format("Data Source={0}", fileName));
             dbConnection.Open();
@@ -27,7 +22,7 @@ namespace BaseLibrary
             return dbConnection;
         }
 
-        public static SqliteCommand databaseCreateCommand(SqliteConnection databaseConnection, string command)
+        public static SqliteCommand DatabaseCreateCommand(SqliteConnection databaseConnection, string command)
         {
             var newCommand = databaseConnection.CreateCommand();
             newCommand.CommandText = command;

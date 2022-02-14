@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ToDoList"
         mc:Ignorable="d"
-        Title="ToDo List" 
+        Title="Database manager" 
         Height="450" Width="500"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" Foreground="#00000000" BorderBrush="Black">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
 
         </Grid.RowDefinitions>
@@ -21,15 +21,17 @@
             <ColumnDefinition Width="*" />
 
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Width="250">
-            <TextBox x:Name="ToDoTitle" Grid.Row="0" Margin="5" MaxLength="26" />
-            <TextBox x:Name="ToDoDetails" Grid.Row="0" Margin="5" Height="185" TextWrapping="Wrap"/>
+        <StackPanel Grid.Row="0" Width="250" Background="#FF5264CA">
+            <Label>Title</Label>
+            <TextBox x:Name="ToDoTitle" Grid.Row="0" Margin="5" MaxLength="26" Background="#FFBDECF5" />
+            <Label>Description</Label>
+            <TextBox x:Name="ToDoDetails" Grid.Row="0" Margin="5" Height="185" TextWrapping="Wrap" Background="#FFBDECF5"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,20">
-            <Button x:Name="saveButton" Click="saveButton_Click" Height="40" Width="120" Content="Save" FontWeight="Bold" FontSize="22" HorizontalAlignment="Left"/>
-        </StackPanel>
 
-        <ListBox Grid.Column="1" x:Name="toDoEntries" SelectionChanged="toDoEntries_SelectionChanged"/>
+        <Button x:Name="saveButton" Click="saveButton_Click" Height="40" Width="250" Content="Save" FontWeight="Bold" FontSize="22" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" FontFamily="Cascadia Mono SemiBold"/>
+        <Button x:Name="removeButton" Click="removeButton_Click" Height="40" Width="250" Content="Remove" FontWeight="Bold" FontSize="22" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" IsEnabled="False" FontFamily="Cascadia Mono SemiBold"/>
+
+        <ListBox Grid.Column="1" Grid.Row="0" x:Name="toDoEntries" SelectionChanged="toDoEntries_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Visible" />
     </Grid>
 </Window>

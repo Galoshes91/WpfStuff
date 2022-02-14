@@ -19,100 +19,134 @@ using System.Diagnostics; // temp
 namespace ToDoList
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Purpose of this application is to play around with database related WPF stuff (specifically using the SQLite library)
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly string databaseName = "database.db";
 
-        private List<ToDoRecord> Records;
+        private ToDoListClass toDoList;
 
         public MainWindow()
         {
             InitializeComponent();
-            Records = new List<ToDoRecord>();
-            GetRecords();
+            toDoList = new ToDoListClass();
+            UpdateList();
         }
 
         private void saveButton_Click(object sender, RoutedEventArgs e)
         {
-            string title = ToDoTitle.Text;
-            string desc = ToDoDetails.Text;
-
-            if (!string.IsNullOrWhiteSpace(title)) {
-                using (var connection = CommonFunctions.databaseOpenConnection(databaseName))
-                {
-                    string insertString = string.Format("INSERT INTO test(Title, Desc) VALUES ('{0}', '{1}')", title, desc);
-                    var command = CommonFunctions.databaseCreateCommand(connection, insertString);
-
-                    command.ExecuteNonQuery();
-
-                    connection.Close();
-                }
-            } 
-            else
-            {
-                Debug.WriteLine("empty strings");
-            }
-
-            GetRecords();
-        }
-
-        private void GetRecords()
-        {
-            Records = new List<ToDoRecord>();
-            var connection = CommonFunctions.databaseOpenConnection(databaseName);
-
-            var command = CommonFunctions.databaseCreateCommand(connection, "SELECT * FROM test");
-            var reader = command.ExecuteReader();
-
-            while (reader.Read())
-            {
-                //Debug.WriteLine(reader.GetString(1));
-                var key = int.Parse(reader.GetString(0));
-                var title = reader.GetString(1);
-                var desc = reader.GetString(2);
-                Records.Add(new ToDoRecord(key, title, desc));
-            }
-
-            connection.Close();
-
-            // Update list
-            toDoEntries.Items.Clear();
-
-            foreach(var record in Records)
-            {
-                toDoEntries.Items.Add(record.ToString());
-                Debug.WriteLine(record.ToString());
-            }
+            toDoList.SaveRecord(ToDoTitle, ToDoDetails);
+            UpdateList();
         }
 
         private void toDoEntries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var buff = sender as ListBox;
-            if (buff != null)
+            if (buff != null && buff.SelectedItem != null)
             {
-                Debug.WriteLine(buff.SelectedItem);
+                removeButton.IsEnabled = true;
+                toDoList.SelectRecord(buff.SelectedItem.ToString());
             }
+        }
+
+        private void UpdateList()
+        {
+            toDoList.GetRecords(toDoEntries);
+        }
+
+        private void removeButton_Click(object sender, RoutedEventArgs e)
+        {
+            toDoList.RemoveRecord();
+            removeButton.IsEnabled = false;
+
+            UpdateList();
         }
     }
 
-    public class ToDoRecord
+    public class ToDoListClass : baseViewModel
     {
-        public int Key;
-        public string Title;
-        public string Desc;
+        private readonly string databaseName = "database.db";
+        private List<ToDoRecord> Records;
+        private string selectedValue;
 
-        public ToDoRecord(int key, string title, string desc)
+        public ToDoListClass()
         {
-            this.Key   = key;
-            this.Title = title;
-            this.Desc  = desc;
+            Records = new List<ToDoRecord>();
         }
 
-        public override string ToString()
+        public void SaveRecord(TextBox ToDoTitle, TextBox ToDoDetails)
         {
-            return string.Format("Key: {0}\nTitle: {1}\nDesc: {2}", Key, Title, Desc);
+            string title = ToDoTitle.Text;
+            string desc = ToDoDetails.Text;
+
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                using (var connection = CommonFunctions.DatabaseOpenConnection(databaseName))
+                {
+                    string insertString = string.Format("INSERT INTO test(Title, Desc) VALUES ('{0}', '{1}')", title, desc);
+                    var command = CommonFunctions.DatabaseCreateCommand(connection, insertString);
+
+                    command.ExecuteNonQuery();
+
+                    connection.Close();
+                }
+            }
+            else
+            {
+                Debug.WriteLine("empty strings");
+            }
+
+            ToDoTitle.Text = string.Empty;
+            ToDoDetails.Text = string.Empty;
+        }
+
+        public void GetRecords(ListBox toDoEntries)
+        {
+            Records = new List<ToDoRecord>();
+            using (var connection = CommonFunctions.DatabaseOpenConnection(databaseName))
+            {
+
+                var command = CommonFunctions.DatabaseCreateCommand(connection, "SELECT * FROM test");
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var key = int.Parse(reader.GetString(0));
+                    var title = reader.GetString(1);
+                    var desc = reader.GetString(2);
+                    Records.Add(new ToDoRecord(key, title, desc));
+                }
+
+                connection.Close();
+            }
+
+            // Update list
+            toDoEntries.Items.Clear();
+
+            foreach (var record in Records)
+            {
+                toDoEntries.Items.Add(record.ToString());
+            }
+        }
+
+        public void SelectRecord(string? item)
+        {
+            // get database ID
+            var x = item.Split(new[] { ' ', '\n' });
+            selectedValue = x[1];
+        }
+
+        public void RemoveRecord()
+        {
+            if(selectedValue != null)
+            {
+                using (var connection = CommonFunctions.DatabaseOpenConnection(databaseName))
+                {
+                    var command = CommonFunctions.DatabaseCreateCommand(connection, string.Format("DELETE FROM test WHERE ID={0}", selectedValue));
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
         }
     }
 }
